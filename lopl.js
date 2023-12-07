@@ -53,3 +53,15 @@ app.post('/savePlace', async (req, res) => {
   const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(place);
   res.json({status: 'success'});
 });
+
+app.get("/display/:id", async (request, response) => {
+    const result = await client
+      .db(databaseAndCollection.db)
+      .collection(databaseAndCollection.collection)
+      .findOne({ _id: ObjectId(request.params.id) });
+  
+    // Assuming the result has a "coordinates" field with an object { lat, lng }
+    const coordinates = result.coordinates;
+  
+    response.render("display.ejs", { address: result.address, coordinates });
+  });  

@@ -1,0 +1,57 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Application Confirmation</title>
+</head>
+
+<body>
+    <h1>Applicants Data</h1>
+    <div>
+        <b>Name: </b><%- name %><br>
+        <b>Local Place Address: </b><%- address %><br>
+        <b>Review: </b><%- review %><br>
+        <b>Background Information: </b><%- background %><br>
+        <hr>
+    </div>
+
+    <!-- Add this block for Google Maps -->
+    <div id="map" style="height: 400px;"></div>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap" async defer></script>
+    <script>
+        function initMap() {
+            var geocoder = new google.maps.Geocoder();
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 15,
+                center: { lat: 0, lng: 0 } // Default center, will be updated with the actual coordinates
+            });
+
+            // Get the local place address from the server (you need to pass this data from the server)
+            var localPlaceAddress = '<%- address %>';
+
+            // Use geocoder to get coordinates from the address
+            geocoder.geocode({ address: localPlaceAddress }, function (results, status) {
+                if (status === 'OK') {
+                    var location = results[0].geometry.location;
+                    map.setCenter(location);
+
+                    // Add a marker for the local place address
+                    new google.maps.Marker({
+                        map: map,
+                        position: location,
+                        title: 'Local Place'
+                    });
+                } else {
+                    console.error('Error getting coordinates: ' + status);
+                }
+            });
+        }
+    </script>
+    <!-- End Google Maps block -->
+
+    <b>Task completed at <%- date %></b>
+    <hr>
+    <a href="/">HOME</a>
+</body>
+
+</html>
