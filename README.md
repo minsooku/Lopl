@@ -5,6 +5,8 @@ A web app that can allow users to save their favorite/interesting spots in local
 ## Procedure to run the program locally:
 npm init
 
+
 npm install
+
 
 node lopl.js
