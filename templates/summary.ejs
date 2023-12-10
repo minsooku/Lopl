@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8" />
+	<title>Submission Summary</title>
+</head>
+
+<body>
+	<h1>Submission Summary</h1>
+
+    <ul>
+        <% submissions.forEach(function(submission) { %>
+            <li>
+                <h2><%= submission.title %></h2>
+                <p><%= submission.description %></p>
+            </li>
+        <% }); %>
+    </ul>
+    
+    <hr>
+    <a href="/">Back to Home</a>
+</body>
+
+</html>

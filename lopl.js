@@ -2,6 +2,7 @@ const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
 const {MongoClient, ServerApiVersion} = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 
 const portNumber = Number(process.argv[2]);
 const app = express();
@@ -65,3 +66,13 @@ app.get("/display/:id", async (request, response) => {
   
     response.render("display.ejs", { address: result.address, coordinates });
   });  
+
+app.get("/", async (request, response) => {
+    const submissions = await client
+      .db(databaseAndCollection.db)
+      .collection(databaseAndCollection.collection)
+      .find({})
+      .toArray();
+  
+    response.render("index.ejs", { submissions });
+});
