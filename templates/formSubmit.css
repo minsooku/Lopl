@@ -1,0 +1,22 @@
+html {
+    font-size: 16px;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: auto;
+    max-width: 60rem;
+    line-height: 1.8rem;
+    background-color: aliceblue;
+}
+
+.main {
+    background-color: white;
+    padding: 30px;
+}
+
+.hr-line {
+    position: relative;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}

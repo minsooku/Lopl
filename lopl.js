@@ -3,76 +3,92 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const {MongoClient, ServerApiVersion} = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
-
 const portNumber = Number(process.argv[2]);
-const app = express();
-
 require("dotenv").config({path: path.resolve(__dirname, 'credentials/.env')});
+
+const ownPath = path.resolve(__dirname, "templates");
 const userName = process.env.MONGO_DB_USERNAME;
 const password = process.env.MONGO_DB_PASSWORD;
 const databaseAndCollection = {db: process.env.MONGO_DB_NAME, collection:process.env.MONGO_COLLECTION};
 
-const ownPath = path.resolve(__dirname, "templates");
+const app = express();
 app.use(express.static(ownPath));
 app.set("views", ownPath);
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended:false}));
-app.use(bodyParser.json()); // To parse JSON data from the client
+//app.use(bodyParser.json()); // To parse JSON data from the client
 
-let client;
 const uri = `mongodb+srv://${userName}:${password}@cluster0.dbibtzp.mongodb.net/`;
-client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1});
+const client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1});
 
-let server = app.listen(portNumber, async () => {
-    console.log(`Web server started and running at http://localhost:${portNumber}`);
-    console.log(`Stop to shutdown the server: `);
-    await client.connect();
+const server = app.listen(portNumber, async () => {
+  console.log(`Web server started and running at http://localhost:${portNumber}`);
+  console.log(`Stop to shutdown the server: `);
+  await client.connect();
 });
 
 process.stdin.setEncoding("utf8");
 
 process.stdin.on("readable", () => {
-    let dataInput = process.stdin.read();
-    if (dataInput !== null) {
-        let command = dataInput.trim();
-        if (isNaN(Number(command)) && command.toLowerCase() === "stop") {
-            console.log("Shutting down the server");
-            server.close(() => {
-                client.close();
-                process.exit(0);
-            });
-        }
+  let dataInput = process.stdin.read();
+  if (dataInput !== null) {
+    let command = dataInput.trim();
+    if (isNaN(Number(command)) && command.toLowerCase() === "stop") {
+      console.log("Shutting down the server");
+      server.close(() => {
+        client.close();
+        process.exit(0);
+      });
     }
+  }
 });
 
-app.get("/", (request, response) => {
-    response.render("index.ejs");
-});
-
-app.post('/savePlace', async (req, res) => {
-  let place = req.body;
-  const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(place);
-  res.json({status: 'success'});
-});
-
-app.get("/display/:id", async (request, response) => {
-    const result = await client
-      .db(databaseAndCollection.db)
-      .collection(databaseAndCollection.collection)
-      .findOne({ _id: ObjectId(request.params.id) });
-  
-    // Assuming the result has a "coordinates" field with an object { lat, lng }
-    const coordinates = result.coordinates;
-  
-    response.render("display.ejs", { address: result.address, coordinates });
-  });  
-
-app.get("/", async (request, response) => {
+async function main() {
+  try {
     const submissions = await client
       .db(databaseAndCollection.db)
       .collection(databaseAndCollection.collection)
       .find({})
       .toArray();
-  
-    response.render("index.ejs", { submissions });
-});
+
+    app.get('/', async (request, response) => {
+      response.render('index', { submissions });
+    });
+
+    app.get('/formSubmit', (req, res) => {
+      res.render('formSubmit',  { portNumber });
+    });
+
+    app.post('/formSubmit', async (req, res) => {
+      const { title } = req.body;
+      const favoritePlaces = {
+        title,
+      };
+
+      res.render('submitConfirmation', {favoritePlaces} );
+    })
+
+    app.post('/savePlace', async (req, res) => {
+      let place = req.body;
+      const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(place);
+      res.json({status: 'success'});
+    });
+
+    app.get("/display:id", async (request, response) => {
+      const result = await client
+        .db(databaseAndCollection.db)
+        .collection(databaseAndCollection.collection)
+        .findOne({ _id: ObjectId(request.params.id) });
+    
+      // Assuming the result has a "coordinates" field with an object { lat, lng }
+      const coordinates = result.coordinates;
+    
+      response.render("display", { address: result.address, coordinates });
+    });
+
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+main().catch(console.error);

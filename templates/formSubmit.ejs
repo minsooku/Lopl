@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>LOPL | Add a Place</title>
+    <link rel="stylesheet" href="formSubmit.css">
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9DBNjGy3fctPZRf_4K2aG1XhCbu-8PHQ&libraries=places"></script>
+</head>
+
+<body>
+    <div class="main">
+        <h1>LOPL | Add a Place</h1>
+
+        <div class="hr-line"><hr></div>
+
+        <form action="http://localhost:<%=portNumber%>/formSubmit" method="post" id="applicationForm">
+            <label>Title: </label>
+            <input type="text" id="title" name="title" required>
+            <br>
+    
+            <label>Category:</label>
+            <select id="category" name="category">
+                <option value="restaurant">Restaurant</option>
+                <option value="attraction">Attraction</option>
+                <option value="hotel">Hotel/Inn</option>
+                <option value="mall">Mall</option>
+                <option value="park">Park</option>
+                <option value="other">Other</option>
+            </select>
+            <br>
+    
+            <label>Location:</label>
+            <input type="text" class="form-control" id="location" placeholder="Type address..." required>
+            <br>
+    
+            <label>Description: </label>
+            <br>
+            <textarea id="description" name="description" rows="10" cols="70" required></textarea>
+            <br>
+    
+            <div id="map" style="height: 400px; width: 100%;"></div>
+            <br>
+    
+            <button type="reset" id="resetButton">Reset</button>
+            <button type="submit" id="submitButton">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        var map;
+        var marker;
+
+        function initMap() {
+            var defaultLocation = { lat: 38.9072, lng: -77.0369 }; // Washington D.C. coordinates
+            var mapOptions = {
+                zoom: 10,
+                center: defaultLocation
+            };
+            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+            var input = document.getElementById('location');
+            var autocomplete = new google.maps.places.Autocomplete(input, {
+                componentRestrictions: { country: 'us' } // Restrict to the USA
+            });
+            autocomplete.bindTo('bounds', map);
+
+            autocomplete.addListener('place_changed', function () {
+                var place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    window.alert("Please select a location from the autocomplete suggestions.");
+                    return;
+                }
+
+                if (marker) {
+                    marker.setMap(null);
+                }
+
+                marker = new google.maps.Marker({
+                    map: map,
+                    position: place.geometry.location
+                });
+
+                map.setCenter(place.geometry.location);
+                map.setZoom(15);
+            });
+
+            document.getElementById('applicationForm').addEventListener('submit', function (event) {
+                var placeInput = document.getElementById('location').value;
+                if (!placeInput || !marker) {
+                    alert('Please select a valid location from the autocomplete suggestions.');
+                    event.preventDefault(); // Prevent form submission
+                } else {
+                    var confirmSubmission = confirm('Are you sure to submit this place?');
+                    if (!confirmSubmission) {
+                        event.preventDefault(); // Prevent form submission if user cancels
+                    } else {
+                        document.getElementById('applicationForm').submit();
+                    }
+                }
+            });
+
+            document.getElementById('resetButton').addEventListener('click', function () {
+                if (map && marker) {
+                    marker.setMap(null);
+                    marker = null;
+                    map.setCenter(defaultLocation);
+                    map.setZoom(10);
+                }
+            });
+        }
+    </script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9DBNjGy3fctPZRf_4K2aG1XhCbu-8PHQ&libraries=places&callback=initMap">
+    </script>
+</body>
+
+</html>
+
