@@ -21,27 +21,30 @@ app.use(bodyParser.urlencoded({extended:false}));
 const uri = `mongodb+srv://${userName}:${password}@cluster0.dbibtzp.mongodb.net/`;
 const client = new MongoClient(uri, {useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1});
 
+const readline = require('readline');
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 const server = app.listen(portNumber, async () => {
   console.log(`Web server started and running at http://localhost:${portNumber}`);
   console.log(`Stop to shutdown the server: `);
   await client.connect();
 });
 
-process.stdin.setEncoding("utf8");
-
-process.stdin.on("readable", () => {
-  let dataInput = process.stdin.read();
-  if (dataInput !== null) {
-    let command = dataInput.trim();
-    if (isNaN(Number(command)) && command.toLowerCase() === "stop") {
-      console.log("Shutting down the server");
-      server.close(() => {
-        client.close();
-        process.exit(0);
-      });
-    }
+rl.on('line', (input) => {
+  if (input.trim().toLowerCase() === 'stop') {
+    console.log('Shutting down the server');
+    server.close(() => {
+      client.close();
+      console.log('Server has been shut down.');
+      process.exit(0);
+    });
   }
 });
+
+process.stdin.setEncoding("utf8");
 
 async function main() {
   try {
@@ -60,12 +63,9 @@ async function main() {
     });
 
     app.post('/formSubmit', async (req, res) => {
-      const { title } = req.body;
-      const favoritePlaces = {
-        title,
-      };
-
-      res.render('submitConfirmation', {favoritePlaces} );
+      let place = req.body;
+      const result = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).insertOne(place);
+      res.render('submitConfirmation', {favoritePlaces: place} );
     })
 
     app.post('/savePlace', async (req, res) => {
@@ -74,17 +74,10 @@ async function main() {
       res.json({status: 'success'});
     });
 
-    app.get("/display:id", async (request, response) => {
-      const result = await client
-        .db(databaseAndCollection.db)
-        .collection(databaseAndCollection.collection)
-        .findOne({ _id: ObjectId(request.params.id) });
-    
-      // Assuming the result has a "coordinates" field with an object { lat, lng }
-      const coordinates = result.coordinates;
-    
-      response.render("display", { address: result.address, coordinates });
-    });
+    app.get('/display', async (req, res) => {
+      const favoritePlaces = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).find({}).toArray();
+      res.render('display', { favoritePlaces });
+    });    
 
   } catch (e) {
     console.error(e);
