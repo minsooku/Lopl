@@ -7,11 +7,91 @@
     <h1>My Favorite Places</h1>
     <% favoritePlaces.forEach(function(place) { %>
         <div>
-            <h2><%= place.title %></h2> <!-- Replace 'title' with the actual key in your place objects -->
-            <p><%= place.category %></p> <!-- Replace 'description' with the actual key in your place objects -->
-            <p><%= place.description %></p> <!-- Replace 'location' with the actual key in your place objects -->
+            <h2><%= place.title %></h2>
+            <p><%= place.category %></p>
+            <p><%= place.description %></p>
+            <p id="<%= place.placeId %>"></p> <!-- We will display the address here -->
             <hr>
         </div>
     <% }); %>
+
+    <button id="reset">Reset Favorite Places</button>
+
+    <br>
+    <br>
+
+    <input id="search" type="text" placeholder="Search for a location" style=" width: 500px;">
+
+    <!-- Add a div element for the Google Map -->
+    <div id="map" style="height: 400px; width: 100%;"></div>
+
+    <script>
+        document.getElementById('reset').addEventListener('click', function() {
+            fetch('/reset', { method: 'POST' })
+            .then(() => location.reload());
+        });
+
+        // Pass the place IDs from EJS to JavaScript
+        var placeIds = <%- JSON.stringify(favoritePlaces.map(place => place.placeId)) %>;
+
+        function initMap() {
+            var defaultLocation = { lat: 38.9072, lng: -77.0369 }; // Washington D.C. coordinates
+            var mapOptions = {
+                zoom: 10,
+                center: defaultLocation
+            };
+            var map = new google.maps.Map(document.getElementById('map'), mapOptions);
+            var geocoder = new google.maps.Geocoder();
+
+            // Use the place IDs in JavaScript
+            var delay = 0; // Initialize delay
+            placeIds.forEach(function(placeId) {
+                setTimeout(function() {
+                    geocodePlaceId(geocoder, placeId);
+                }, delay); // Add a delay between each request
+                delay += 200; // Increase the delay for the next request (200ms)
+            });
+
+            function geocodePlaceId(geocoder, placeId) {
+                geocoder
+                    .geocode({ placeId: placeId })
+                    .then(({ results }) => {
+                        if (results[0]) {
+                            document.getElementById(placeId).innerText = results[0].formatted_address;
+                        } else {
+                            window.alert("No results found");
+                        }
+                    })
+            }
+
+            var input = document.getElementById('search');
+            var autocomplete = new google.maps.places.Autocomplete(input);
+            autocomplete.bindTo('bounds', map);
+
+            autocomplete.addListener('place_changed', function () {
+                var place = autocomplete.getPlace();
+                if (!place.geometry || !place.geometry.location) {
+                    window.alert("Please select a location from the autocomplete suggestions.");
+                    return;
+                }
+
+                // Move the map to the selected place
+                map.setCenter(place.geometry.location);
+                map.setZoom(15);
+
+                // Add a marker at the selected place
+                var marker = new google.maps.Marker({
+                    position: place.geometry.location,
+                    map: map
+                });
+            });
+        }
+    </script>
+
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9DBNjGy3fctPZRf_4K2aG1XhCbu-8PHQ&libraries=places&callback=initMap">
+    </script>
+    <hr>
+    <a href="/">HOME</a>
 </body>
 </html>

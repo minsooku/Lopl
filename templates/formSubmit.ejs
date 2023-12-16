@@ -34,7 +34,8 @@
             <br>
     
             <label>Location:</label>
-            <input type="text" class="form-control" id="location" placeholder="Type address..." required>
+            <input type="text" class="form-control" id="location" placeholder="Type address..." style=" width: 500px;" required>
+            <input type="hidden" id="placeId" name="placeId"> <!-- Hidden input field for place ID -->
             <br>
     
             <label>Description: </label>
@@ -74,7 +75,6 @@
                     window.alert("Please select a location from the autocomplete suggestions.");
                     return;
                 }   
-
                 if (marker) {
                     marker.setMap(null);
                 }
@@ -86,6 +86,8 @@
 
                 map.setCenter(place.geometry.location);
                 map.setZoom(15);
+
+                document.getElementById('placeId').value = place.place_id;
             });
 
             document.getElementById('applicationForm').addEventListener('submit', function (event) {
