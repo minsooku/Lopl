@@ -3,17 +3,25 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Application Confirmation</title>
+    <title>LOPL | Confirmation</title>
+    <link rel="stylesheet" href="submitConfirmation.css">
 </head>
 
 <body>
-    <h1>Submission Successful</h1>
+    <div class="main">
+        <h1>Submission Successful</h1>
 
-    <p>Title: <%= favoritePlaces.title %></p>
-    <p>Category: <%= favoritePlaces.category %></p>
-    <p>Description: <%= favoritePlaces.description %></p>
+        <div class="hr-line"><hr></div>
 
-    <a href="/">HOME</a>
+        <p>Title: <%= favoritePlaces.title %></p>
+        <p>Category: <%= favoritePlaces.category %></p>
+        Description:
+        <p><%= favoritePlaces.description %></p>
+
+        <div class="hr-line"><hr></div>
+    
+        <a href="/"><u>HOME</u></a>
+    </div>
 </body>
 
 </html>

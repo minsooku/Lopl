@@ -2,33 +2,46 @@
 <html>
 <head>
     <title>Favorite Places</title>
+    <link rel="stylesheet" href="display.css">
 </head>
 <body>
-    <h1>My Favorite Places</h1>
-    <% favoritePlaces.forEach(function(place) { %>
-        <div>
-            <h2><%= place.title %></h2>
-            <p><%= place.category %></p>
-            <p><%= place.description %></p>
-            <p id="<%= place.placeId %>"></p> <!-- We will display the address here -->
-            <hr>
-        </div>
-    <% }); %>
+    <div class="main">
+        <h1><a href="/">LOPL</a> | My Favorite Places</h1>
 
-    <button id="reset">Reset Favorite Places</button>
+        <div class="hr-line"><hr></div>
 
-    <br>
-    <br>
+        <% favoritePlaces.forEach(function(place) { %>
+            <div>
+                <h2><%= place.title %></h2>
+                <p><b>Category:</b> <%= place.category %></p>
+                <b>Description:</b>
+                <p><%= place.description %></p>
+                <b>Address:</b>
+                <p id="<%= place.placeId %>"></p>
+                <div class="hr-line"><hr></div>
+            </div>
+        <% }); %>
+    
+        <button id="reset">Remove All Favorite Places</button>
+    
+        <div class="hr-line"><hr></div>
 
-    <input id="search" type="text" placeholder="Search for a location" style=" width: 500px;">
+        Search for a location:
+        <input id="search" type="text" placeholder="Type address..." style=" width: 500px;">
 
-    <!-- Add a div element for the Google Map -->
-    <div id="map" style="height: 400px; width: 100%;"></div>
+        <div id="map" style="height: 400px; width: 100%;"></div>
+        <div class="hr-line"><hr></div>
+
+        <a href="/"><u>HOME</u></a>
+    </div>
 
     <script>
         document.getElementById('reset').addEventListener('click', function() {
-            fetch('/reset', { method: 'POST' })
-            .then(() => location.reload());
+            var confirmDelete = confirm('Are you sure you want to remove all?');
+            if (confirmDelete) {
+                fetch('/reset', { method: 'POST' })
+                .then(() => location.reload());
+            }
         });
 
         // Pass the place IDs from EJS to JavaScript
@@ -91,7 +104,5 @@
     <script async defer
     src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB9DBNjGy3fctPZRf_4K2aG1XhCbu-8PHQ&libraries=places&callback=initMap">
     </script>
-    <hr>
-    <a href="/">HOME</a>
 </body>
 </html>

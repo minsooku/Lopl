@@ -78,6 +78,7 @@ async function main() {
       const favoritePlaces = await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).find({}).toArray();
       res.render('display', { favoritePlaces });
     });    
+
     app.post('/reset', async (req, res) => {
       await client.db(databaseAndCollection.db).collection(databaseAndCollection.collection).deleteMany({});
       res.redirect('/display');
