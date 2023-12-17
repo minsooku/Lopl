@@ -17,7 +17,7 @@
 
         <div class="hr-line"><hr></div>
 
-        <form action="http://localhost:<%=portNumber%>/formSubmit" method="post" id="applicationForm">
+        <form method="post" id="applicationForm">
             <label>Title: </label>
             <input type="text" id="title" name="title" required>
             <br>
@@ -117,6 +117,23 @@
                 }
             });
         }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('applicationForm').addEventListener('submit', function (event) {
+                var placeInput = document.getElementById('search').value; // Get the value from the search input
+                if (!placeInput) {
+                    alert('Please select a valid location from the autocomplete suggestions.');
+                    event.preventDefault();
+                } else {
+                    var confirmSubmission = confirm('Are you sure to submit this place?');
+                    if (!confirmSubmission) {
+                        event.preventDefault();
+                    }
+                }
+            });
+        });
     </script>
 
     <script async defer
