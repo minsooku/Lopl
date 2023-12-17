@@ -13,3 +13,15 @@ Procedure to run the program locally:
 npm init
 npm install
 node lopl.js <PORT NUMBER>
+
+Google Maps Geocoding API:
+https://developers.google.com/maps/documentation/geocoding/overview
+
+Google Maps Places API:
+https://developers.google.com/maps/documentation/places/web-service/overview
+
+Video Link:
+https://youtu.be/-l_kCYwXFe4
+
+Website Link:
+https://lopl-q28y.onrender.com
